@@ -104,8 +104,8 @@ public final class MongoSourceTask extends SourceTask {
 
   @Override
   public void start(final Map<String, String> props) {
-    LOGGER.info("Starting MongoDB source task");
     MongoSourceConfig sourceConfig;
+    LOGGER.info("Starting MongoDB source task", props);
     try {
       sourceConfig = new MongoSourceConfig(props);
     } catch (Exception e) {
