@@ -108,6 +108,15 @@ public class DefaultTopicMapper implements TopicMapper {
       return databaseMatch + SEPARATOR + collName;
     }
 
+    /*
+     * For configuration where the event from a collection from all databases
+     * needs to be pushed to same topic
+     */
+    String collectionMatch = topicNamespaceMap.get(ALL + SEPARATOR + collName, "");
+    if (!collectionMatch.isEmpty()) {
+      return collectionMatch;
+    }
+
     return topicNamespaceMap.get(ALL, namespace);
   }
 }
