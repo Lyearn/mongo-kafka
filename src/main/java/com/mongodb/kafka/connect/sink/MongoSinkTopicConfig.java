@@ -149,6 +149,14 @@ public class MongoSinkTopicConfig extends AbstractConfig {
           + "Requires the 'namespace.mapper' to be set to 'com.mongodb.kafka.connect.sink.topic.mapping.FieldPathNamespaceMapper'.";
   private static final String FIELD_VALUE_COLLECTION_NAMESPACE_MAPPER_DEFAULT = EMPTY_STRING;
 
+  public static final String MANUAL_NAMESPACE_MAPPER_CONFIG = "namespace.mapper.manual.config";
+  private static final String MANUAL_NAMESPACE_MAPPER_DISPLAY =
+      "List of custom mappings for topic to namespace.";
+  private static final String MANUAL_NAMESPACE_MAPPER_DOC =
+      "The mapping array to use as topic to namespace map. "
+          + "Requires the 'namespace.mapper' to be set to 'com.mongodb.kafka.connect.sink.topic.mapping.ManualNamespaceMapper'.";
+  private static final String MANUAL_NAMESPACE_MAPPER_DEFAULT = "";
+
   public static final String FIELD_NAMESPACE_MAPPER_ERROR_IF_INVALID_CONFIG =
       "namespace.mapper.error.if.invalid";
   private static final String FIELD_NAMESPACE_MAPPER_ERROR_IF_INVALID_DISPLAY =
@@ -771,6 +779,16 @@ public class MongoSinkTopicConfig extends AbstractConfig {
         ++orderInGroup,
         ConfigDef.Width.MEDIUM,
         FIELD_VALUE_COLLECTION_NAMESPACE_MAPPER_DISPLAY);
+    configDef.define(
+        MANUAL_NAMESPACE_MAPPER_CONFIG,
+        Type.STRING,
+        MANUAL_NAMESPACE_MAPPER_DEFAULT,
+        ConfigDef.Importance.MEDIUM,
+        MANUAL_NAMESPACE_MAPPER_DOC,
+        group,
+        ++orderInGroup,
+        ConfigDef.Width.MEDIUM,
+        MANUAL_NAMESPACE_MAPPER_DISPLAY);
     configDef.define(
         FIELD_NAMESPACE_MAPPER_ERROR_IF_INVALID_CONFIG,
         Type.BOOLEAN,
