@@ -158,16 +158,26 @@ public class DefaultTopicMapper implements TopicMapper {
   private String getUndecoratedTopicName(final String dbName, final String collName) {
     assertFalse(dbName.isEmpty());
     String namespace = namespace(dbName, collName);
+
+    // exact match: dbName.collName
     String topicNameTemplate = simplePairs.get(namespace);
     if (topicNameTemplate != null) {
       return topicNameTemplate;
     }
 
+    // partial match: dbName.collName
     topicNameTemplate = simplePairs.get(dbName);
     if (topicNameTemplate != null) {
       return undecoratedTopicName(topicNameTemplate, collName);
     }
 
+    // Wildcard collection match: *.collName
+    topicNameTemplate = simplePairs.get("*" + separator + collName);
+    if (topicNameTemplate != null) {
+      return topicNameTemplate;
+    }
+
+    // Regex pattern match
     String undecoratedTopicName =
         regexPairs.stream()
             .filter(pair -> pair.getKey().reset(namespace).matches())
@@ -178,9 +188,12 @@ public class DefaultTopicMapper implements TopicMapper {
       return undecoratedTopicName;
     }
 
+    // Fallback wildcard topic name
     if (undecoratedWildcardTopicName != null) {
       return undecoratedWildcardTopicName;
     }
+
+    // build topic name using dbName + collName
     return undecoratedTopicName(dbName, collName);
   }
 

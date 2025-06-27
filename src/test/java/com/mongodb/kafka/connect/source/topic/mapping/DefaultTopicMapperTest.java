@@ -314,6 +314,37 @@ public class DefaultTopicMapperTest {
         () -> assertThrows(ConfigException.class, () -> createMapper("{'/[invalid': 'topicOne'}")));
   }
 
+  @Test
+  @DisplayName("getTopic returns wildcard match topic for *.orders mapping")
+  void testGetTopicWithWildcardCollectionMatchReadable() {
+    // Configures: any collection named 'orders' in any DB → goes to 'orders-topic'
+    Map<String, String> config = new HashMap<>();
+    config.put(TOPIC_SEPARATOR_CONFIG, ".");
+    config.put(TOPIC_NAMESPACE_MAP_CONFIG, "{'*.orders': 'orders-topic'}");
+
+    DefaultTopicMapper mapper = new DefaultTopicMapper();
+    mapper.configure(createSourceConfig(config));
+
+    // Simulate a change stream event from database 'sales' and collection 'orders'
+    // Change stream from sales.orders
+    BsonDocument salesDoc =
+        new BsonDocument(
+            "ns",
+            new BsonDocument("db", new BsonString("sales"))
+                .append("coll", new BsonString("orders")));
+    // Change stream from users.orders
+    BsonDocument usersDoc =
+        new BsonDocument(
+            "ns",
+            new BsonDocument("db", new BsonString("users"))
+                .append("coll", new BsonString("orders")));
+
+    // Validate that the topic is resolved to 'orders-topic'
+    // Both should resolve to the same topic
+    assertEquals("orders-topic", mapper.getTopic(salesDoc));
+    assertEquals("orders-topic", mapper.getTopic(usersDoc));
+  }
+
   private static DefaultTopicMapper createMapper(final MongoSourceConfig config) {
     DefaultTopicMapper topicMapper = new DefaultTopicMapper();
     topicMapper.configure(config);
