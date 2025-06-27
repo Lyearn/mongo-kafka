@@ -315,23 +315,34 @@ public class DefaultTopicMapperTest {
   }
 
   @Test
-  @DisplayName("test getTopic triggers wildcard collection match (*.collName)")
-  void testGetTopicTriggersWildcardCollectionMatch() {
+  @DisplayName("getTopic returns wildcard match topic for *.orders mapping")
+  void testGetTopicWithWildcardCollectionMatchReadable() {
+    // Configures: any collection named 'orders' in any DB → goes to 'orders-topic'
     Map<String, String> config = new HashMap<>();
     config.put(TOPIC_SEPARATOR_CONFIG, ".");
-    config.put(TOPIC_NAMESPACE_MAP_CONFIG, "{'*.myColl': 'wildTopic'}");
+    config.put(TOPIC_NAMESPACE_MAP_CONFIG, "{'*.orders': 'orders-topic'}");
 
     DefaultTopicMapper mapper = new DefaultTopicMapper();
     mapper.configure(createSourceConfig(config));
 
-    BsonDocument changeStreamDoc =
+    // Simulate a change stream event from database 'sales' and collection 'orders'
+    // Change stream from sales.orders
+    BsonDocument salesDoc =
         new BsonDocument(
             "ns",
-            new BsonDocument("db", new BsonString("anyDb"))
-                .append("coll", new BsonString("myColl")));
+            new BsonDocument("db", new BsonString("sales"))
+                .append("coll", new BsonString("orders")));
+    // Change stream from users.orders
+    BsonDocument usersDoc =
+        new BsonDocument(
+            "ns",
+            new BsonDocument("db", new BsonString("users"))
+                .append("coll", new BsonString("orders")));
 
-    String topic = mapper.getTopic(changeStreamDoc);
-    assertEquals("wildTopic", topic);
+    // Validate that the topic is resolved to 'orders-topic'
+    // Both should resolve to the same topic
+    assertEquals("orders-topic", mapper.getTopic(salesDoc));
+    assertEquals("orders-topic", mapper.getTopic(usersDoc));
   }
 
   private static DefaultTopicMapper createMapper(final MongoSourceConfig config) {
