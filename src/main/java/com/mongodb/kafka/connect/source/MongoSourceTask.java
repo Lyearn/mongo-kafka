@@ -105,7 +105,7 @@ public final class MongoSourceTask extends SourceTask {
   @SuppressWarnings("try")
   @Override
   public void start(final Map<String, String> props) {
-    LOGGER.info("Starting MongoDB source task");
+    LOGGER.info("Starting MongoDB source task", props);
     StatisticsManager statisticsManager = null;
     MongoClient mongoClient = null;
     MongoCopyDataManager copyDataManager = null;
