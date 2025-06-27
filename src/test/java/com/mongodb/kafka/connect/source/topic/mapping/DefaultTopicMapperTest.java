@@ -314,6 +314,26 @@ public class DefaultTopicMapperTest {
         () -> assertThrows(ConfigException.class, () -> createMapper("{'/[invalid': 'topicOne'}")));
   }
 
+  @Test
+  @DisplayName("test getTopic triggers wildcard collection match (*.collName)")
+  void testGetTopicTriggersWildcardCollectionMatch() {
+    Map<String, String> config = new HashMap<>();
+    config.put(TOPIC_SEPARATOR_CONFIG, ".");
+    config.put(TOPIC_NAMESPACE_MAP_CONFIG, "{'*.myColl': 'wildTopic'}");
+
+    DefaultTopicMapper mapper = new DefaultTopicMapper();
+    mapper.configure(createSourceConfig(config));
+
+    BsonDocument changeStreamDoc =
+        new BsonDocument(
+            "ns",
+            new BsonDocument("db", new BsonString("anyDb"))
+                .append("coll", new BsonString("myColl")));
+
+    String topic = mapper.getTopic(changeStreamDoc);
+    assertEquals("wildTopic", topic);
+  }
+
   private static DefaultTopicMapper createMapper(final MongoSourceConfig config) {
     DefaultTopicMapper topicMapper = new DefaultTopicMapper();
     topicMapper.configure(config);
